@@ -3,30 +3,26 @@ import Dropdown from "./Dropdown";
 import RightContainer from "./RightContainer";
 import axios from "axios";
 export default function ApiList() {
-  const apilist = ["User Api", "Post Api", "Comment Api"];
+  const apilist = ["option"];
   const [newApiList, setApiList] = useState(apilist);
   const [textHeading, setTextHeading] = useState("Select the Api");
   const [request, setRequest] = useState("no request available at the moment");
   const [response, setResponse] = useState("no response available");
-
   const handleApiList = () => {
-    const api = prompt("enter name of new list of api:");
+    const api = "option";
     setApiList([...newApiList, api]);
   };
-
   const handleTextHeading = (newHeading) => {
     setTextHeading(newHeading);
   };
-
   const handleRequest = (newRequest) => {
     setRequest(newRequest);
   };
-
   const handleResponse = (newResponse) => {
     setResponse(newResponse);
   };
-
   const handleUserApi = async () => {
+    handleTextHeading("User Api");
     try {
       const response = await axios.get(
         "https://jsonplaceholder.typicode.com/users"
@@ -35,18 +31,16 @@ export default function ApiList() {
         const name = user.name;
         const id = user.id;
         const email = user.email;
-
         return { name, id, email };
       });
-
       setResponse(userArray);
     } catch (error) {
       setResponse("error");
       console.log(error);
     }
   };
-
   const handlePostApi = () => {
+    handleTextHeading("Post Api");
     const data = request;
     axios
       .post("https://your-api-endpoint", data)
@@ -59,12 +53,37 @@ export default function ApiList() {
       });
   };
   const handleCommentApi = async () => {
-    const postId = prompt("Enter post ID to search:");
+    handleTextHeading("Comment Api");
+    let postId = 0;
+    const handle = () => {
+      return (
+        <form>
+          <label>
+            Enter the PostId to search:
+            <input
+              className={"border-gray-200 rounded "}
+              type="number"
+              value={postId}
+            />
+          </label>
+          <button
+            type="submit"
+            className="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2 ml-2"
+            onClick={() => {
+              return postId;
+            }}
+          >
+            Search Comments
+          </button>
+        </form>
+      );
+    };
     try {
       const response = await axios.get(
         `https://jsonplaceholder.typicode.com/comments?postId=${postId}`
       );
-      setResponse(response.data);
+      handleRequest(handle);
+      handleResponse(response.data);
     } catch (error) {
       setResponse("error");
       console.log(error);
@@ -81,7 +100,6 @@ export default function ApiList() {
               <div className="py-1">
                 <Dropdown
                   key={index}
-                  newapi={newapi}
                   onSelect={(api) => {
                     if (api === "User Api") {
                       handleUserApi();

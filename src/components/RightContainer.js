@@ -29,7 +29,7 @@ export default function RightContainer({ textHeading, request, response }) {
             ></PencilSquareIcon>
           </div>
         </div>
-        <div className="w-full h-20 overflow-y-auto border border-gray-300 rounded shadow">
+        <div className="w-full h-20 overflow-y-auto shadow">
           {JSON.stringify(response)}
         </div>
       </div>

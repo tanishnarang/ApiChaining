@@ -1,23 +1,36 @@
-import { Menu, MenuButton } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import React from "react";
+import { Select, Space } from "antd";
 
-export default function Dropdown({ newapi, onSelect }) {
+const Dropdown = ({ onSelect }) => {
+  const handleChange = (value) => {
+    onSelect(value);
+  };
+
   return (
-    <div>
-      <Menu as="div" className="relative inline-block text-left w-full">
-        <div>
-          <MenuButton
-            onClick={onSelect(newapi)}
-            className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-left"
-          >
-            {newapi}
-            <ChevronDownIcon
-              aria-hidden="true"
-              className="-mr-1 h-5 w-5 text-gray-400"
-            />
-          </MenuButton>
-        </div>
-      </Menu>
-    </div>
+    <Space wrap>
+      <Select
+        defaultValue="Option"
+        style={{
+          maxWidth: "inherit",
+        }}
+        onChange={handleChange}
+        options={[
+          {
+            value: "User Api",
+            label: "User Api",
+          },
+          {
+            value: "Post Api",
+            label: "Post Api",
+          },
+          {
+            value: "Comment Api",
+            label: "Comment Api",
+          },
+        ]}
+      />
+    </Space>
   );
-}
+};
+
+export default Dropdown;
