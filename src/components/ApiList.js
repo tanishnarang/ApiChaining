@@ -8,6 +8,13 @@ export default function ApiList() {
   const [textHeading, setTextHeading] = useState("Select the Api");
   const [request, setRequest] = useState("no request available at the moment");
   const [response, setResponse] = useState("no response available");
+  const [data, setData] = useState({
+    title: "",
+    body: "",
+    userId: "",
+  });
+  const [postId, setPostId] = useState("");
+
   const handleApiList = () => {
     const api = "option";
     setApiList([...newApiList, api]);
@@ -41,20 +48,62 @@ export default function ApiList() {
   };
   const handlePostApi = () => {
     handleTextHeading("Post Api");
-    const data = request;
-    axios
-      .post("https://your-api-endpoint", data)
-      .then((response) => {
-        setResponse(response.data);
-      })
-      .catch((error) => {
-        setResponse("error");
-        console.log(error);
-      });
+
+    const handleSubmit = () => {
+      axios
+        .post("https://jsonplaceholder.typicode.com/posts", data)
+        .then((response) => {
+          handleResponse(response.data);
+        })
+        .catch((error) => {
+          handleResponse("error");
+          console.log(error);
+        });
+    };
+    const getData = () => {
+      return (
+        <form onSubmit={handleSubmit}>
+          <label>
+            Enter the title:
+            <input
+              type="text"
+              name="title"
+              value={data.title}
+              onChange={(e) => {
+                setData({ ...data, title: e.target.value });
+                console.log(data);
+              }}
+            />
+          </label>
+          <label>
+            write the body:
+            <input
+              type="text"
+              name="body"
+              value={data.body}
+              // onChange={}
+            />
+          </label>
+          <label>
+            Enter userId:
+            <input
+              type="text"
+              name="userId"
+              value={data.userId}
+              // onChange={}
+            />
+          </label>
+          <input type="submit" />
+        </form>
+      );
+    };
+    return <div>{getData()}</div>;
   };
   const handleCommentApi = async () => {
     handleTextHeading("Comment Api");
-    let postId = 0;
+    const handlePostId = () => {
+      setPostId();
+    };
     const handle = () => {
       return (
         <form>
@@ -63,15 +112,13 @@ export default function ApiList() {
             <input
               className={"border-gray-200 rounded "}
               type="number"
-              value={postId}
+              name="postId"
             />
           </label>
           <button
             type="submit"
+            onSubmit={console.log(postId)}
             className="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2 ml-2"
-            onClick={() => {
-              return postId;
-            }}
           >
             Search Comments
           </button>
@@ -122,6 +169,10 @@ export default function ApiList() {
             </button>
           </div>
         </div>
+        <button className="text-white bg-green-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-pink-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2">
+          {" "}
+          Execute
+        </button>
       </div>
       <div className="border-l border-gray-300 max-h-max mt-20 ml-5 mr-5"></div>
       <RightContainer
