@@ -1,161 +1,151 @@
 import { useState } from "react";
+import _ from "lodash";
 import Dropdown from "./Dropdown";
+import { message } from "antd";
 import RightContainer from "./RightContainer";
 import axios from "axios";
 export default function ApiList() {
-  const apilist = ["option"];
-  const [newApiList, setApiList] = useState(apilist);
-  const [textHeading, setTextHeading] = useState("Select the Api");
-  const [request, setRequest] = useState("no request available at the moment");
-  const [response, setResponse] = useState("no response available");
-  const [data, setData] = useState({
-    title: "",
-    body: "",
-    userId: "",
+  const availableApi = [
+    {
+      name: "userApi",
+      label: "User Api",
+      request: {},
+      endPoint: "https://jsonplaceholder.typicode.com/users",
+      method: "GET",
+    },
+    {
+      name: "postApi",
+      label: "Post Api",
+      request: {
+        title: "favourite cars",
+        body: "1969 ford mustang,1960 toyota celica,1970 dodge charger",
+        userId: "{{userApi[0].id}}",
+      },
+      endPoint: "https://jsonplaceholder.typicode.com/posts",
+      method: "POST",
+    },
+    {
+      name: "commentApi",
+      label: "Comment Api",
+      request: { postId: 4 },
+      endPoint: "https://jsonplaceholder.typicode.com/comments",
+      method: "GET",
+    },
+  ];
+  const [apiSequence, setApiSequence] = useState([availableApi[0]]);
+
+  const dropdownOptions = availableApi.map((api) => {
+    return { value: api.name, label: api.label };
   });
-  const [postId, setPostId] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
+  const [activeRequest, setActiveRequest] = useState({});
+  const [expectedResponse, setExpectedResponse] = useState({
+    title: "favourite cars",
+    body: "1969 ford mustang,1960 toyota celica,1970 dodge charger",
+    userId: 1,
+  });
 
-  const handleApiList = () => {
-    const api = "option";
-    setApiList([...newApiList, api]);
+  const addApiToSequence = () => {
+    setApiSequence([...apiSequence, {}]);
   };
-  const handleTextHeading = (newHeading) => {
-    setTextHeading(newHeading);
+
+  const handleApiOptionSelect = (index, option) => {
+    const selectedOption = availableApi.find((api) => api.name === option);
+    const updatedSequence = [...apiSequence];
+    updatedSequence[index] = selectedOption;
+    setApiSequence(updatedSequence);
   };
-  const handleRequest = (newRequest) => {
-    setRequest(newRequest);
+
+  const handleOptionClick = (value) => {
+    const selectedOption = apiSequence.find((api) => api.name === value);
+    setActiveRequest(selectedOption);
   };
-  const handleResponse = (newResponse) => {
-    setResponse(newResponse);
+
+  const onRequestUpdate = (updatedRequest, apiName) => {
+    const index = apiSequence.findIndex((api) => api.name === apiName);
+    const updatedSequence = [...apiSequence];
+    updatedSequence[index].request = updatedRequest.src;
+    setApiSequence(updatedSequence);
   };
-  const handleUserApi = async () => {
-    handleTextHeading("User Api");
-    try {
-      const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
+  const transformRequests = (request, responses) => {
+    console.log(request);
+    Object.keys(request).forEach((key) => {
+      console.log(request, key, request[key], responses);
+      if (request[key]?.toString()?.startsWith("{{")) {
+        const accessBy = request[key].substring(
+          request[key].indexOf("{{") + 2,
+          request[key].lastIndexOf("}}")
+        );
+        request[key] = getFieldByAccessor(responses, accessBy);
+      }
+    });
+    return request;
+  };
+
+  const getFieldByAccessor = (obj, accessor) => {
+    return accessor
+      .replace(/\[(\w+)\]/g, ".$1") // Convert [0] to .0, handles array index cases
+      .replace(/^\./, "") // Remove leading dot, if any
+      .split(".") // Split into array by dot notation
+      .reduce(
+        (o, key) => (o && o[key] !== undefined ? o[key] : undefined),
+        obj
       );
-      const userArray = response.data.map((user) => {
-        const name = user.name;
-        const id = user.id;
-        const email = user.email;
-        return { name, id, email };
+  };
+
+  const success = () => {
+    messageApi.open({
+      type: "success",
+      content: "Test Passed!",
+    });
+  };
+
+  const error = () => {
+    messageApi.open({
+      type: "error",
+      content: "Test Failed!",
+    });
+  };
+
+  const handleExecute = async () => {
+    const responses = {};
+
+    for await (const api of apiSequence) {
+      console.log(responses);
+      const apiRequest = transformRequests(api.request, responses);
+      const response = await axios({
+        method: api.method,
+        url: api.endPoint,
+        params: api.method === "GET" ? apiRequest : {},
+        data: api.method === "POST" ? apiRequest : {},
       });
-      setResponse(userArray);
-    } catch (error) {
-      setResponse("error");
-      console.log(error);
+      responses[api.name] = response.data;
     }
-  };
-  const handlePostApi = () => {
-    handleTextHeading("Post Api");
-
-    const handleSubmit = () => {
-      axios
-        .post("https://jsonplaceholder.typicode.com/posts", data)
-        .then((response) => {
-          handleResponse(response.data);
-        })
-        .catch((error) => {
-          handleResponse("error");
-          console.log(error);
-        });
-    };
-    const getData = () => {
-      return (
-        <form onSubmit={handleSubmit}>
-          <label>
-            Enter the title:
-            <input
-              type="text"
-              name="title"
-              value={data.title}
-              onChange={(e) => {
-                setData({ ...data, title: e.target.value });
-                console.log(data);
-              }}
-            />
-          </label>
-          <label>
-            write the body:
-            <input
-              type="text"
-              name="body"
-              value={data.body}
-              // onChange={}
-            />
-          </label>
-          <label>
-            Enter userId:
-            <input
-              type="text"
-              name="userId"
-              value={data.userId}
-              // onChange={}
-            />
-          </label>
-          <input type="submit" />
-        </form>
-      );
-    };
-    return <div>{getData()}</div>;
-  };
-  const handleCommentApi = async () => {
-    handleTextHeading("Comment Api");
-    const handlePostId = () => {
-      setPostId();
-    };
-    const handle = () => {
-      return (
-        <form>
-          <label>
-            Enter the PostId to search:
-            <input
-              className={"border-gray-200 rounded "}
-              type="number"
-              name="postId"
-            />
-          </label>
-          <button
-            type="submit"
-            onSubmit={console.log(postId)}
-            className="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2 ml-2"
-          >
-            Search Comments
-          </button>
-        </form>
-      );
-    };
-    try {
-      const response = await axios.get(
-        `https://jsonplaceholder.typicode.com/comments?postId=${postId}`
-      );
-      handleRequest(handle);
-      handleResponse(response.data);
-    } catch (error) {
-      setResponse("error");
-      console.log(error);
-    }
-    return;
+    // console.log(responses);
+    // console.log(expectedResponse);
+    const lastResponse = responses[apiSequence[apiSequence.length - 1].name];
+    console.log(_.isEqual(lastResponse, expectedResponse));
+    _.isEqual(lastResponse, expectedResponse) ? success() : error();
+    console.log(lastResponse, expectedResponse);
   };
   return (
     <div className="flex">
+      {contextHolder}
       <div className="ml-10 mt-20 w-1/3">
         <div className="font-bold">Select Api Sequence</div>
         <div className="flex flex-col border rounded px-4 py-2 mt-2">
-          {newApiList.map((newapi, index) => {
+          {apiSequence.map((api, index) => {
             return (
               <div className="py-1">
                 <Dropdown
                   key={index}
-                  onSelect={(api) => {
-                    if (api === "User Api") {
-                      handleUserApi();
-                    } else if (api === "Post Api") {
-                      handlePostApi();
-                    } else if (api === "Comment Api") {
-                      handleCommentApi();
-                    }
+                  options={dropdownOptions}
+                  value={api.name}
+                  onSelect={(selectedOption) => {
+                    handleApiOptionSelect(index, selectedOption);
                   }}
+                  onBlur={(value) => handleOptionClick(value)}
+                  onClick={(value) => handleOptionClick(value)}
                 />
               </div>
             );
@@ -163,22 +153,26 @@ export default function ApiList() {
           <div className="">
             <button
               className="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2"
-              onClick={handleApiList}
+              onClick={addApiToSequence}
             >
               Add
             </button>
           </div>
         </div>
-        <button className="text-white bg-green-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-pink-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2">
+        <button
+          className="text-white bg-green-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-pink-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2"
+          onClick={handleExecute}
+        >
           {" "}
           Execute
         </button>
       </div>
       <div className="border-l border-gray-300 max-h-max mt-20 ml-5 mr-5"></div>
       <RightContainer
-        textHeading={textHeading}
-        request={request}
-        response={response}
+        selectedApi={activeRequest}
+        onRequestEdit={onRequestUpdate}
+        expectedResponse={expectedResponse}
+        setExpectedResponse={setExpectedResponse}
       />
     </div>
   );

@@ -1,33 +1,19 @@
 import React from "react";
 import { Select, Space } from "antd";
 
-const Dropdown = ({ onSelect }) => {
-  const handleChange = (value) => {
-    onSelect(value);
-  };
-
+const Dropdown = ({ onSelect, options, value, onClick, onBlur }) => {
   return (
     <Space wrap>
       <Select
-        defaultValue="Option"
+        value={value}
+        placeholder="select option"
         style={{
-          maxWidth: "inherit",
+          width: "250px",
         }}
-        onChange={handleChange}
-        options={[
-          {
-            value: "User Api",
-            label: "User Api",
-          },
-          {
-            value: "Post Api",
-            label: "Post Api",
-          },
-          {
-            value: "Comment Api",
-            label: "Comment Api",
-          },
-        ]}
+        onChange={onSelect}
+        options={options}
+        onClick={() => onClick(value)}
+        onBlur={() => onBlur(value)}
       />
     </Space>
   );
