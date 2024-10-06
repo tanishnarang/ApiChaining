@@ -1,71 +1,56 @@
-# Getting Started with Create React App
+# API Chaining
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Approach Explanation
 
-## Available Scripts
+**API Chaining** is a responsive web application built using **React.js** and **Tailwind CSS**. The project demonstrates the concept of API chaining, where the response from one API is used as the input or trigger for another API call. The application allows for dynamic API requests and responses, with features for editing and deleting JSON data in real time.
 
-In the project directory, you can run:
+This project integrates several core technologies and libraries to handle API interactions, state management, and user interface elements.
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **API Chaining**: Demonstrates the chaining of multiple API requests, using one API's response as input for subsequent API calls.
+- **Editable JSON View**: Utilizes the `react18-json-view` library to allow users to edit and view JSON data in an interactive, editable format.
+- **Dynamic Request & Response**: Users can dynamically edit the API request data, and the application automatically updates the expected response.
+- **Error Handling**: Includes error handling to manage issues that arise during API requests.
+- **Responsive UI**: The application is styled using **Tailwind CSS**, ensuring a responsive and modern design that adapts to different screen sizes.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Tech Stack
 
-### `npm test`
+- **React.js**: Frontend library used to create the user interface.
+- **Tailwind CSS**: Utility-first CSS framework for styling the application.
+- **Axios**: Promise-based HTTP client used for making API requests.
+- **Ant Design**: UI library used to enhance the visual components of the app.
+- **Lodash**: Utility library used for data manipulation.
+- **react18-json-view**: Library used to render and edit JSON objects directly in the UI.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Usage
 
-### `npm run build`
+- On loading the application, select an API from the available list.
+- Edit the API request JSON data in the left container.
+- Observe the dynamically updated expected response on the right.
+- Delete or edit individual JSON keys as needed.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Project Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+api-chaining/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── ApiList.js
+│   │   ├── Dropdown.js
+│   │   ├── RightContainer.js
+│   ├── App.js
+│   ├── index.js
+├── package.json
+└── README.md
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **`App.js`**: The main component that ties together the API list and response editor.
+- **`ApiList.js`**: Renders the list of APIs available for chaining.
+- **`Dropdown.js`**: Renders a Dropdown by gathering from Apilist.
+- **`RightContainer.js`**: Displays and allows editing of both the API request and expected response.
 
-### `npm run eject`
+## Assumptions and Decisions Made
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# ApiChaining
+Due to the differences present between the description and the video i have assumed the approach of the video to be followed for the development of this demo.
