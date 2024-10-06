@@ -4,6 +4,8 @@ import Dropdown from "./Dropdown";
 import { message } from "antd";
 import RightContainer from "./RightContainer";
 import axios from "axios";
+import { TrashIcon } from "@heroicons/react/24/outline";
+
 export default function ApiList() {
   const availableApi = [
     {
@@ -19,7 +21,7 @@ export default function ApiList() {
       request: {
         title: "favourite cars",
         body: "1969 ford mustang,1960 toyota celica,1970 dodge charger",
-        userId: "{{userApi[0].id}}",
+        userId: 1,
       },
       endPoint: "https://jsonplaceholder.typicode.com/posts",
       method: "POST",
@@ -32,11 +34,8 @@ export default function ApiList() {
       method: "GET",
     },
   ];
-  const [apiSequence, setApiSequence] = useState([availableApi[0]]);
 
-  const dropdownOptions = availableApi.map((api) => {
-    return { value: api.name, label: api.label };
-  });
+  const [apiSequence, setApiSequence] = useState([availableApi[0]]);
   const [messageApi, contextHolder] = message.useMessage();
   const [activeRequest, setActiveRequest] = useState({});
   const [expectedResponse, setExpectedResponse] = useState({
@@ -45,8 +44,19 @@ export default function ApiList() {
     userId: 1,
   });
 
+  const dropdownOptions = availableApi.map((api) => {
+    return { value: api.name, label: api.label };
+  });
+
   const addApiToSequence = () => {
-    setApiSequence([...apiSequence, {}]);
+    if (apiSequence.length < 3) {
+      setApiSequence([...apiSequence, {}]);
+    } else {
+      messageApi.open({
+        type: "warning",
+        content: "You can only add up to 3 APIs.",
+      });
+    }
   };
 
   const handleApiOptionSelect = (index, option) => {
@@ -61,16 +71,14 @@ export default function ApiList() {
     setActiveRequest(selectedOption);
   };
 
-  const onRequestUpdate = (updatedRequest, apiName) => {
-    const index = apiSequence.findIndex((api) => api.name === apiName);
+  const removeApiFromSequence = (index) => {
     const updatedSequence = [...apiSequence];
-    updatedSequence[index].request = updatedRequest.src;
+    updatedSequence.splice(index, 1);
     setApiSequence(updatedSequence);
   };
+
   const transformRequests = (request, responses) => {
-    console.log(request);
     Object.keys(request).forEach((key) => {
-      console.log(request, key, request[key], responses);
       if (request[key]?.toString()?.startsWith("{{")) {
         const accessBy = request[key].substring(
           request[key].indexOf("{{") + 2,
@@ -84,9 +92,9 @@ export default function ApiList() {
 
   const getFieldByAccessor = (obj, accessor) => {
     return accessor
-      .replace(/\[(\w+)\]/g, ".$1") // Convert [0] to .0, handles array index cases
-      .replace(/^\./, "") // Remove leading dot, if any
-      .split(".") // Split into array by dot notation
+      .replace(/\[(\w+)\]/g, ".$1")
+      .replace(/^\./, "")
+      .split(".")
       .reduce(
         (o, key) => (o && o[key] !== undefined ? o[key] : undefined),
         obj
@@ -108,10 +116,17 @@ export default function ApiList() {
   };
 
   const handleExecute = async () => {
+    if (apiSequence.length === 0) {
+      messageApi.open({
+        type: "error",
+        content: "Please add at least one API to the sequence.",
+      });
+      return;
+    }
+
     const responses = {};
 
     for await (const api of apiSequence) {
-      console.log(responses);
       const apiRequest = transformRequests(api.request, responses);
       const response = await axios({
         method: api.method,
@@ -121,24 +136,32 @@ export default function ApiList() {
       });
       responses[api.name] = response.data;
     }
-    // console.log(responses);
-    // console.log(expectedResponse);
+
     const lastResponse = responses[apiSequence[apiSequence.length - 1].name];
-    console.log(_.isEqual(lastResponse, expectedResponse));
     _.isEqual(lastResponse, expectedResponse) ? success() : error();
-    console.log(lastResponse, expectedResponse);
+    console.log("last:", lastResponse);
+    console.log("expect:", expectedResponse);
   };
+
+  const onRequestUpdate = (updatedRequest, apiName) => {
+    const index = apiSequence.findIndex((api) => api.name === apiName);
+    const updatedSequence = [...apiSequence];
+    updatedSequence[index].request = updatedRequest.src;
+    setApiSequence(updatedSequence);
+  };
+
   return (
-    <div className="flex">
+    <div className="flex bg-black text-white min-h-screen">
       {contextHolder}
       <div className="ml-10 mt-20 w-1/3">
-        <div className="font-bold">Select Api Sequence</div>
-        <div className="flex flex-col border rounded px-4 py-2 mt-2">
+        <div className="font-bold text-lg text-gray-300">
+          Select API Sequence
+        </div>
+        <div className="flex flex-col border border-gray-700 rounded px-4 py-2 mt-2 bg-gray-800 shadow-md">
           {apiSequence.map((api, index) => {
             return (
-              <div className="py-1">
+              <div className="py-1 flex items-center" key={index}>
                 <Dropdown
-                  key={index}
                   options={dropdownOptions}
                   value={api.name}
                   onSelect={(selectedOption) => {
@@ -146,28 +169,30 @@ export default function ApiList() {
                   }}
                   onBlur={(value) => handleOptionClick(value)}
                   onClick={(value) => handleOptionClick(value)}
+                  className="flex-grow min-w-0"
+                />
+                <TrashIcon
+                  className="w-6 h-6 text-red-500 cursor-pointer ml-2"
+                  onClick={() => removeApiFromSequence(index)}
                 />
               </div>
             );
           })}
-          <div className="">
-            <button
-              className="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2"
-              onClick={addApiToSequence}
-            >
-              Add
-            </button>
-          </div>
+          <button
+            className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 mt-2"
+            onClick={addApiToSequence}
+          >
+            Add API
+          </button>
         </div>
         <button
-          className="text-white bg-green-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-pink-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-2"
+          className="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-500 font-medium rounded-lg text-sm px-5 py-2.5 mt-4"
           onClick={handleExecute}
         >
-          {" "}
-          Execute
+          Execute Sequence
         </button>
       </div>
-      <div className="border-l border-gray-300 max-h-max mt-20 ml-5 mr-5"></div>
+      <div className="border-l-2 border-gray-600 max-h-max ml-5 mr-5"></div>
       <RightContainer
         selectedApi={activeRequest}
         onRequestEdit={onRequestUpdate}
